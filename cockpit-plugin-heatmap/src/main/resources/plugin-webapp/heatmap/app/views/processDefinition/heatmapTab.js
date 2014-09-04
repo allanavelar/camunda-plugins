@@ -12,7 +12,7 @@ ngDefine('cockpit.plugin.heatmap.views', function(module) {
 			
 			if (!document.getElementById('heatmapArea')) {
 				$scope.heatmapElement = angular.element('<div id="heatmapArea"/>');
-				var diagramId = 'processDiagram_' + $scope.processDefinition.id.replace(/:/g, '_');
+				var diagramId = 'processDiagram_' + $scope.processDefinition.id.replace(/:/g, '_').replace(/\./g, '_');
 				$('div#' + diagramId).parent().prepend($scope.heatmapElement);
 				var diagramHeight = document.getElementsByTagName('svg')[0].style.height.replace(/px/,'') | $('div#' + diagramId).height();
 				var diagramWidth = document.getElementsByTagName('svg')[0].style.width.replace(/px/,'') | $('div#' + diagramId).width();
@@ -29,35 +29,37 @@ ngDefine('cockpit.plugin.heatmap.views', function(module) {
 				canvas.style.zIndex = 998;
 			}
 		}
-		
-		$scope.$on('$viewContentLoaded', function() {
-			var processData = $scope.processData.newChild($scope);   
 
-			processData.observe(['filter','activityInstanceHistoricStatistics', function(filter,activityInstanceHistoricStatistics) {
-
-				$scope.initHeatMap();
-
-				if ($scope.heatmap) {
-					$scope.heatmap.clear();
-					angular.forEach(activityInstanceHistoricStatistics, function(statsElement) {    				 
-						angular.forEach($scope.$parent.processDiagram.bpmnElements, function(elem) {
-
-							if (elem.id === statsElement.id) {
-								var coord = $scope.getCoordinates(elem);
-								$scope.heatmap.store.addDataPoint(coord.x,coord.y);		
-								$('#'+elem.id).css('z-index', 999);
-							}
-						});
-					});
-				}
-				$scope.filter = filter;
-			}]);
+		angular.element(document).ready(function () {
+			$scope.initHeatMap();
 		});
+
+		var processData = $scope.processData.newChild($scope);
+
+		processData.observe(['filter','activityInstanceHistoricStatistics',
+			function(filter,activityInstanceHistoricStatistics) {
+
+			if ($scope.heatmap) {
+				$scope.heatmap.clear();
+				angular.forEach(activityInstanceHistoricStatistics, function(statsElement) {
+					angular.forEach($scope.$parent.processDiagram.bpmnElements, function(elem) {
+						if (elem.id === statsElement.id) {
+							var coord = $scope.getCoordinates(elem);
+							$scope.heatmap.store.addDataPoint(coord.x, coord.y);
+							$('#'+elem.id).css('z-index', 999);
+						}
+					});
+				 });
+			}
+
+			$scope.filter = filter;
+
+		}]);
 		
 		$scope.getCoordinates = function(elem) {
-			return{
-				x: (elem.bounds.x/1) + (elem.bounds.width/2),
-				y: (elem.bounds.y/1) + (elem.bounds.height/2)
+			return {
+				x:  (elem.bounds.x / 1) + (elem.bounds.width / 2),
+				y:  (elem.bounds.y / 1) + (elem.bounds.height / 2)
 			};
 		};
 
@@ -69,15 +71,14 @@ ngDefine('cockpit.plugin.heatmap.views', function(module) {
 			var bpmnElements = $scope.$parent.processDiagram.bpmnElements;
 
 			var statsElemente = {};
-				angular.forEach($scope.activityStats, function(statsElement) {
+			angular.forEach($scope.activityStats, function(statsElement) {
 				statsElemente[statsElement.id] = 1;
 			});
 
 			angular.forEach(bpmnElements, function(elem) {
 				if (elem.id.toLowerCase().indexOf('sequenceflow') == 0) {
-					
-					angular.forEach($scope.activityStats, function(statsElement) {
 
+					angular.forEach($scope.activityStats, function(statsElement) {
 						if (elem.targetRef == statsElement.id) {
 
 							if (!statsElemente[elem.sourceRef]) return;
@@ -90,26 +91,31 @@ ngDefine('cockpit.plugin.heatmap.views', function(module) {
 							var coord1 = $scope.getCoordinates(endElement);
 							$scope.addHeatMapDataPoint(coord1, statsElement.count);
 
-							var steps = 10;
-							var h_step = Math.abs(coord.x-coord1.x) / 10;
-							var v_step = Math.abs(coord.y-coord1.y) / 10;
+							var steps = Math.sqrt(((coord.x - coord1.x) * (coord.x - coord1.x)) +
+								((coord.y - coord1.y) * (coord.y - coord1.y))) / 20;
+
+							var h_step = -(coord.x - coord1.x) / steps;
+							var v_step = -(coord.y - coord1.y) / steps;
 							var actualx = coord.x + h_step;
 							var actualy = coord.y + v_step;
-
 							for (var int = 0; int < steps-1; int++) {
 								$scope.addHeatMapDataPoint({ x:actualx, y:actualy }, statsElement.count);
 								actualx = actualx + h_step;
 								actualy = actualy + v_step;
-							} 
+							}
 						}
 					});
 				}
 			});
 		};
 
-		$scope.addHeatMapDataPoint = function(coord, wertung){    	
-			for (var int = 0; int < wertung; int++) {
-				$scope.heatmap.store.addDataPoint(coord.x,coord.y);
+		$scope.clearHeatMap = function(){
+			$scope.heatmap.clear();
+		};
+
+		$scope.addHeatMapDataPoint = function(coord, evaluation) {
+			for (var int = 0; int < evaluation; int++) {
+				$scope.heatmap.store.addDataPoint(coord.x, coord.y);
 			}
 		};
 
