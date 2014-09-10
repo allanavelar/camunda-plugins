@@ -1,6 +1,10 @@
 package br.allanavelar.camunda.cockpit.plugin.heatmap.dto;
 
-public class StatsContainerDto {
+import java.io.Serializable;
+
+public class StatsContainerDto implements Serializable, Comparable<StatsContainerDto> {
+
+	private static final long serialVersionUID = 6876213796557883909L;
 
 	private String id;
 	private long count;
@@ -21,4 +25,8 @@ public class StatsContainerDto {
 		this.count = count;
 	}
 
+	@Override
+	public int compareTo(StatsContainerDto o) {
+		return this.getId().compareTo(o.getId());
+	}
 }
