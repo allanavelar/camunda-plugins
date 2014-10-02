@@ -2,6 +2,7 @@ ngDefine('cockpit.plugin.heatmap.views', function(module) {
 
 	function HeatmapController ($scope, HeatmapService, HeatmapEngineSpecificResource) {
 
+		$scope.show = false;
 		$scope.activityStats = null;
 
 		HeatmapEngineSpecificResource.query({id: $scope.processDefinition.id}).$then(function(response) {
@@ -42,50 +43,58 @@ ngDefine('cockpit.plugin.heatmap.views', function(module) {
 			};
 		};
 
-		$scope.showActivityHeatMap = function() {
+		$scope.toggleActivityHeatMap = function($event) {
+
+			$($event.target.parentElement).toggleClass('active');
 
 			HeatmapService.initHeatMap($scope.processDefinition.id);
-			HeatmapService.clear();
 
-			var bpmnElements = $scope.$parent.processDiagram.bpmnElements;
+			if ($scope.show) {
+				HeatmapService.clear();
+			} else {
 
-			var statsElemente = {};
-			angular.forEach($scope.activityStats, function(statsElement) {
-				statsElemente[statsElement.id] = statsElement.count;
-			});
+				$scope.show = !$scope.show;
 
-			angular.forEach(bpmnElements, function(elem) {
-				if (elem.id.toLowerCase().indexOf('sequenceflow') == 0) {
-					angular.forEach($scope.activityStats, function(statsElement) {
-						if (elem.targetRef == statsElement.id) {
-							if (!statsElemente[elem.sourceRef]) return;
+				var bpmnElements = $scope.$parent.processDiagram.bpmnElements;
 
-							var weight = Math.min(statsElemente[elem.sourceRef], statsElement.count);
+				var statsElemente = {};
+				angular.forEach($scope.activityStats, function(statsElement) {
+					statsElemente[statsElement.id] = statsElement.count;
+				});
 
-							var startElement = eval('bpmnElements.' + elem.sourceRef);
-							var coord = $scope.getCoordinates(startElement);
-							HeatmapService.addHeatMapDataPoint(coord, weight);
+				angular.forEach(bpmnElements, function(elem) {
+					if (elem.id.toLowerCase().indexOf('sequenceflow') == 0) {
+						angular.forEach($scope.activityStats, function(statsElement) {
+							if (elem.targetRef == statsElement.id) {
+								if(!statsElemente[elem.sourceRef]) return;
 
-							var endElement = eval('bpmnElements.' + elem.targetRef);
-							var coord1 = $scope.getCoordinates(endElement);
-							HeatmapService.addHeatMapDataPoint(coord1, weight);
+								var weight = Math.min(statsElemente[elem.sourceRef], statsElement.count);
 
-							var steps = Math.sqrt(((coord.x - coord1.x) * (coord.x - coord1.x)) +
-								((coord.y - coord1.y) * (coord.y - coord1.y))) / 20;
+								var startElement = eval('bpmnElements.' + elem.sourceRef);
+								var coord = $scope.getCoordinates(startElement);
+								HeatmapService.addHeatMapDataPoint(coord, weight);
 
-							var h_step = -(coord.x - coord1.x) / steps;
-							var v_step = -(coord.y - coord1.y) / steps;
-							var actualx = coord.x + h_step;
-							var actualy = coord.y + v_step;
-							for (var int = 0; int < steps-1; int++) {
-								HeatmapService.addHeatMapDataPoint({x:actualx, y:actualy}, weight);
-								actualx = actualx + h_step;
-								actualy = actualy + v_step;
+								var endElement = eval('bpmnElements.' + elem.targetRef);
+								var coord1 = $scope.getCoordinates(endElement);
+								HeatmapService.addHeatMapDataPoint(coord1, weight);
+
+								var steps = Math.sqrt(((coord.x - coord1.x) * (coord.x - coord1.x)) +
+									((coord.y - coord1.y) * (coord.y - coord1.y))) / 10;
+
+								var h_step = -(coord.x - coord1.x) / steps;
+								var v_step = -(coord.y - coord1.y) / steps;
+								var actualx = coord.x + h_step;
+								var actualy = coord.y + v_step;
+								for (var int = 0; int < steps - 1; int++) {
+									HeatmapService.addHeatMapDataPoint({ x:actualx, y:actualy }, weight);
+									actualx = actualx + h_step;
+									actualy = actualy + v_step;
+								}
 							}
-						}
-					});
-				}
-			});
+						});
+					}
+				});
+			}
 		};
 
 		$scope.clearHeatMap = function() {
@@ -94,7 +103,7 @@ ngDefine('cockpit.plugin.heatmap.views', function(module) {
 	};
 
 	module.controller('HeatmapController', [
-		'$scope','HeatmapService', 'HeatmapEngineSpecificResource', HeatmapController]);
+		'$scope', 'HeatmapService', 'HeatmapEngineSpecificResource', HeatmapController]);
 
 	module.service('HeatmapService', function() {
 
@@ -137,13 +146,6 @@ ngDefine('cockpit.plugin.heatmap.views', function(module) {
 	});
 
 	var Configuration = function PluginConfiguration(ViewsProvider) {
-
-		ViewsProvider.registerDefaultView('cockpit.processDefinition.runtime.tab', {
-			id: 'heatmap-tab', label: 'Heatmap',
-			url: 'plugin://heatmap/static/app/views/processDefinition/heatmap-tab.html',
-			controller: 'HeatmapController',
-			priority: 66
-		});
 
 		ViewsProvider.registerDefaultView('cockpit.processDefinition.runtime.action', {
 			id: 'heatmap-action', label: 'Heatmap-action',
