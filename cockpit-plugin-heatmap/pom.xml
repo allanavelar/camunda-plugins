@@ -7,9 +7,17 @@
 	<version>0.9.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
+	<name>Camunda Cockpit Plugin: Heatmap</name>
+	<description>This is a simple camunda cockpit plugin that showcases how you can visualize some simple historic statistics on the process definition view by using a heatmap.</description>
+	<url>https://github.com/allanavelar/camunda-plugins/tree/master/cockpit-plugin-heatmap</url>
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<camunda.version>7.1.0-Final</camunda.version>
+		<camunda.plugin.category>Monitoring</camunda.plugin.category>
+		<camunda.plugin.screenshot>screenshot.png</camunda.plugin.screenshot>
+		<camunda.plugin.testedOnVersion>7.1.0-Final</camunda.plugin.testedOnVersion>
+		<camunda.plugin.language>EN</camunda.plugin.language>
 	</properties>
 
 	<dependencies>
