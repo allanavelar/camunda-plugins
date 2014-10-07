@@ -15,7 +15,8 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<camunda.version>7.1.0-Final</camunda.version>
 		<camunda.plugin.category>Monitoring</camunda.plugin.category>
-		<camunda.plugin.screenshot>screenshot.png</camunda.plugin.screenshot>
+		<camunda.plugin.screenshot>screenshot1.png</camunda.plugin.screenshot>
+		<camunda.plugin.screenshot.1>screenshot2.png</camunda.plugin.screenshot.1>
 		<camunda.plugin.testedOnVersion>7.1.0-Final</camunda.plugin.testedOnVersion>
 		<camunda.plugin.language>EN</camunda.plugin.language>
 	</properties>
@@ -54,4 +55,11 @@
 		</dependency>
 	</dependencies>
 
+	<repositories>
+		<repository>
+			<id>camunda-bpm-nexus</id>
+			<name>camunda-bpm-nexus</name>
+			<url>https://app.camunda.com/nexus/content/groups/public</url>
+		</repository>
+	</repositories>
 </project>

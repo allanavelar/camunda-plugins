@@ -13,27 +13,27 @@ ngDefine('cockpit.plugin.heatmap.views', function(module) {
 			HeatmapService.initHeatMap($scope.processDefinition.id);
 		});
 
-		var processData = $scope.processData.newChild($scope);
+		// var processData = $scope.processData.newChild($scope);
 
-		processData.observe(['filter', 'activityInstanceHistoricStatistics',
-			function(filter,activityInstanceHistoricStatistics) {
+		// processData.observe(['filter', 'activityInstanceHistoricStatistics',
+		// 	function(filter,activityInstanceHistoricStatistics) {
 
-			if (HeatmapService.heatmap) {
-				HeatmapService.clear();
-				angular.forEach(activityInstanceHistoricStatistics, function(statsElement) {
-					angular.forEach($scope.$parent.processDiagram.bpmnElements, function(elem) {
-						if (elem.id === statsElement.id) {
-							var coord = $scope.getCoordinates(elem);
-							HeatmapService.heatmap.addData({ x:coord.x, y:coord.y, value:1 });
-							$('#'+elem.id).css('z-index', 999);
-						}
-					});
-				});
-			}
+		// 	if (HeatmapService.heatmap) {
+		// 		HeatmapService.clear();
+		// 		angular.forEach(activityInstanceHistoricStatistics, function(statsElement) {
+		// 			angular.forEach($scope.$parent.processDiagram.bpmnElements, function(elem) {
+		// 				if (elem.id === statsElement.id) {
+		// 					var coord = $scope.getCoordinates(elem);
+		// 					HeatmapService.heatmap.addData({ x:coord.x, y:coord.y, value:1 });
+		// 					$('#'+elem.id).css('z-index', 999);
+		// 				}
+		// 			});
+		// 		});
+		// 	}
 
-			$scope.filter = filter;
+		// 	$scope.filter = filter;
 
-		}]);
+		// }]);
 
 
 		$scope.getCoordinates = function(elem) {
@@ -132,7 +132,7 @@ ngDefine('cockpit.plugin.heatmap.views', function(module) {
 				$('div#'+diagramId).parent().prepend(this.heatmapElement);
 
 				var config = {
-					"radius": 10,
+					"radius": 30,
 					"visible": true,
 					"container":document.getElementById('heatmapArea')
 				};
