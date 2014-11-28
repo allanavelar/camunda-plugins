@@ -5,8 +5,8 @@ ngDefine('cockpit.plugin.heatmap.views', function(module) {
 		$scope.show = false;
 		$scope.activityStats = null;
 
-		HeatmapEngineSpecificResource.query({id: $scope.processDefinition.id}).$then(function(response) {
-			$scope.activityStats = response.data;
+		HeatmapEngineSpecificResource.query({id: $scope.processDefinition.id}).$promise.then(function(response) {
+			$scope.activityStats = response;
 		});
 
 		angular.element(document).ready(function () {
@@ -119,7 +119,7 @@ ngDefine('cockpit.plugin.heatmap.views', function(module) {
 		this.initHeatMap = function(processDefinitionId) {
 			if (!document.getElementById('heatmapArea')) {
 
-				var diagramId = 'processDiagram_' + processDefinitionId.replace(/:/g, '_').replace(/\./g, '_');
+				var diagramId = 'processDiagram_1'; //since 7.2.0 'processDiagram_' + processDefinitionId.replace(/:/g, '_').replace(/\./g, '_');
 
 				var diagramHeight = document.getElementsByTagName('svg')[0].style.height.replace(/px/,'') ||
 					$('div#' + diagramId).height();
@@ -129,7 +129,7 @@ ngDefine('cockpit.plugin.heatmap.views', function(module) {
 				this.heatmapElement = $('<div id="heatmapArea" style="position: absolute;"/>')
 					.width(diagramWidth).height(diagramHeight);
 
-				$('div#'+diagramId).parent().prepend(this.heatmapElement);
+				$('div#' + diagramId).parent().prepend(this.heatmapElement);
 
 				var config = {
 					"radius": 30,
